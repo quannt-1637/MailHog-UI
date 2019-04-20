@@ -411,9 +411,15 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
   }
 
   $scope.tryDecodeContent = function(message) {
-    var charset = "UTF-8"
-    if(message.Content.Headers["Content-Type"][0]) {
-      // TODO
+    var charset = "UTF-8";
+    if (message.Content.Headers["Content-Type"][0]) {
+      var contentTypes = message.Content.Headers["Content-Type"][0].split(';');
+      if (angular.isDefined(contentTypes[1])) {
+        var charsets = contentTypes[1].split('=');
+        if (charsets[0].toLowerCase().trim() === 'charset' && angular.isDefined(charsets[1])) {
+          charset = charsets[1].replace(/['"]+/g, '').toUpperCase();
+        }
+      }
     }
 
     var content = message.Content.Body;
@@ -422,6 +428,7 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
     if(contentTransferEncoding) {
       switch (contentTransferEncoding.toLowerCase()) {
         case 'quoted-printable':
+        case '7bit':
           content = content.replace(/=[\r\n]+/gm,"");
           content = unescapeFromQuotedPrintableWithoutRFC2047(content, charset);
           break;
