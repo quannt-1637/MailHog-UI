@@ -31,7 +31,7 @@
 
               <input ng-model="searchText" type="text" ng-key-enter="search('containing', searchText)" class="form-control" autocomplete="off" placeholder="Search" id="search" ng-focus="keepopen=true" ng-click="$event.stopPropagation()">
 
-              <div class="list-group" ng-if="searchText.length > 0 && keepopen">
+              <div class="list-group" ng-if="searchText.length > 0 && keepopen" ng-cloak>
                 <a href="#" ng-click="search('containing', searchText)" class="list-group-item">
                   Find messages <strong>containing</strong> {{ searchText }}
                 </a>
@@ -56,7 +56,7 @@
       </div>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container-fluid" ng-cloak>
       <div class="row">
         <div class="col-md-2 col-sm-3">
           <ul class="nav nav-pills nav-stacked">
@@ -130,7 +130,7 @@
           </div>
         </div>
 
-        <div class="col-md-10 col-sm-9 content">
+        <div class="col-md-10 col-sm-9 content" ng-cloak>
           [: .Content :]
         </div>
       </div>
