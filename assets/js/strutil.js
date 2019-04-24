@@ -307,6 +307,10 @@ function decodeUrl(str) {
   return decodeQuotedPrintableHelper(str, "%");
 }
 
+function decode7bit(str) {
+  return decodeQuotedPrintableHelper(str, '');
+}
+
 function encodeQuotedPrintableHelper(data_bytes, prefix, should_escape) {
   var encoded = '';
   var prefix_code = prefix.charCodeAt(0);
@@ -913,6 +917,12 @@ function unescapeFromQuotedPrintableWithoutRFC2047(str, encoding) {
 // "%E3%81%82%E3%81%84" => "あい"
 function unescapeFromUrl(str, encoding) {
   var decoded_bytes = decodeUrl(str);
+  var unicode_bytes = convertBytesToUnicodeCodePoints(decoded_bytes, encoding);
+  return convertUnicodeCodePointsToString(unicode_bytes);
+}
+
+function unescapeFrom7bit(str, encoding) {
+  var decoded_bytes = decode7bit(str);
   var unicode_bytes = convertBytesToUnicodeCodePoints(decoded_bytes, encoding);
   return convertUnicodeCodePointsToString(unicode_bytes);
 }

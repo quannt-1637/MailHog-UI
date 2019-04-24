@@ -412,7 +412,7 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
 
   $scope.tryDecodeContent = function(message) {
     var charset = "UTF-8";
-    if (message.Content.Headers["Content-Type"][0]) {
+    if (message.Content.Headers["Content-Type"] && message.Content.Headers["Content-Type"][0]) {
       var contentTypes = message.Content.Headers["Content-Type"][0].split(';');
       if (angular.isDefined(contentTypes[1])) {
         var charsets = contentTypes[1].split('=');
@@ -423,12 +423,13 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
     }
 
     var content = message.Content.Body;
-    var contentTransferEncoding = message.Content.Headers["Content-Transfer-Encoding"][0];
+    var contentTransferEncoding = message.Content.Headers["Content-Transfer-Encoding"]
+        ? message.Content.Headers["Content-Transfer-Encoding"][0]
+        : null;
 
     if(contentTransferEncoding) {
       switch (contentTransferEncoding.toLowerCase()) {
         case 'quoted-printable':
-        case '7bit':
           content = content.replace(/=[\r\n]+/gm,"");
           content = unescapeFromQuotedPrintableWithoutRFC2047(content, charset);
           break;
@@ -437,6 +438,17 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
           content = content.replace(/\r?\n|\r/gm,"");
           content = unescapeFromBase64(content, charset);
           break;
+        case '7bit':
+          content = content.replace(/=[\r\n]+/gm,"");
+          content = unescapeFrom7bit(content, charset);
+          break;
+      }
+    } else if (message.Content.Headers["Subject"][0]) {
+      var subjectParts = splitMimeString(message.Content.Headers["Subject"][0]);
+      if (subjectParts[0] && subjectParts[0].match(MIME_PARTIAL_MATCH)) {
+        charset = subjectParts[0].match(MIME_PARTIAL_MATCH)[1];
+        content = content.replace(/=[\r\n]+/gm,"");
+        content = unescapeFrom7bit(content, charset);
       }
     }
 
@@ -471,6 +483,11 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
     if(l != null && l !== "undefined") {
       return $scope.tryDecode(l);
     }
+
+    if ((message.Content.Headers && message.Content.Headers["Subject"])) {
+      return $scope.tryDecodeContent(message);
+    }
+
     return message.Content.Body;
   }
 
