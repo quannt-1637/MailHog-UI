@@ -191,8 +191,25 @@ mailhogApp.controller('MailCtrl', function ($scope, $http, $sce, $timeout) {
   }
 
   $scope.getSender = function(message) {
-    return $scope.tryDecodeMime($scope.getDisplayName(message.Content.Headers["From"][0]) ||
-                                message.From.Mailbox + "@" + message.From.Domain);
+    var sender = message.From.Mailbox + '@' + message.From.Domain;
+
+    if (angular.isDefined(message.Content.Headers['From'])) {
+      sender = $scope.getDisplayName(message.Content.Headers['From'][0]) || sender;
+    }
+
+    return $scope.tryDecodeMime(sender);
+  }
+
+  $scope.getSubject = function (message) {
+    var subject = '';
+
+    if (angular.isDefined(message.Content.Headers['Subject'])) {
+      subject = message.Content.Headers['Subject'][0];
+    } else {
+      subject = message.Raw.Data.slice(message.Raw.Data.indexOf('='), message.Raw.Data.indexOf('From'));
+    }
+
+    return $scope.tryDecodeMime(subject);
   }
 
   $scope.getDisplayName = function(value) {

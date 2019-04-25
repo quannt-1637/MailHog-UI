@@ -46,7 +46,7 @@
     </div>
 
     <div class="col-md-5 col-sm-5">
-      <span class="subject unread">{{ tryDecodeMime(message.Content.Headers["Subject"][0]) }}</span>
+      <span class="subject unread">{{ getSubject(message) }}</span>
     </div>
     <div class="col-md-4 col-sm-3">
       <div class="row">
@@ -149,7 +149,7 @@
           </tr>
           <tr>
             <th>Subject</th>
-            <td><strong>{{ tryDecodeMime(preview.Content.Headers["Subject"][0]) }}</strong></td>
+            <td><strong>{{ getSubject(preview) }}</strong></td>
           </tr>
           <tr>
             <th>To</th>
